@@ -75,3 +75,8 @@ def add_diffusiondet_config(cfg):
                                  [0, 256], [0, 192],
                                  [0, 192], [0, 96],
                                  [0, 10000])
+
+    cfg.DATASETS.PATH_TO_LB_TRAIN = ""
+    cfg.DATASETS.PATH_TO_IMG_TRAIN = ""
+    cfg.DATASETS.PATH_TO_LB_TEST = ""
+    cfg.DATASETS.PATH_TO_IMG_TEST = ""
