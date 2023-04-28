@@ -31,6 +31,7 @@ from detectron2.engine import DefaultTrainer, default_argument_parser, default_s
 from detectron2.evaluation import COCOEvaluator, LVISEvaluator, verify_results
 from detectron2.solver.build import maybe_add_gradient_clipping
 from detectron2.modeling import build_model
+from detectron2.data.datasets import register_coco_instances
 
 from diffusiondet import DiffusionDetDatasetMapper, add_diffusiondet_config, DiffusionDetWithTTA
 from diffusiondet.util.model_ema import add_model_ema_configs, may_build_model_ema, may_get_ema_checkpointer, EMAHook, \
@@ -114,6 +115,14 @@ class Trainer(DefaultTrainer):
 
     @classmethod
     def build_train_loader(cls, cfg):
+
+        register_coco_instances(cfg.DATASETS.TRAIN[0], {},
+                                cfg.DATASETS.PATH_TO_LB_TRAIN,
+                                cfg.DATASETS.PATH_TO_IMG_TRAIN)
+        register_coco_instances(cfg.DATASETS.TEST[0], {},
+                                cfg.DATASETS.PATH_TO_LB_TEST,
+                                cfg.DATASETS.PATH_TO_IMG_TEST)
+
         mapper = DiffusionDetDatasetMapper(cfg, is_train=True)
         return build_detection_train_loader(cfg, mapper=mapper)
 
