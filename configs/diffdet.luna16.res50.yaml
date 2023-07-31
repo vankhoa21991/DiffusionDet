@@ -6,14 +6,14 @@ MODEL:
     STRIDE_IN_1X1: False
   DiffusionDet:
     NUM_PROPOSALS: 500
-    NUM_CLASSES: 80
+    NUM_CLASSES: 1
 DATASETS:
   TRAIN: ("luna16_train",)
   TEST:  ("luna16_val",)
-  PATH_TO_LB_TRAIN: "/home/vankhoa@median.cad/datasets/MedDec/Task016_Luna/coco/coco_format/train_annotations.json"
-  PATH_TO_IMG_TRAIN: "/home/vankhoa@median.cad/datasets/MedDec/Task016_Luna/coco/coco_format/train/images"
-  PATH_TO_LB_TEST: "/home/vankhoa@median.cad/datasets/MedDec/Task016_Luna/coco/coco_format/val_annotations.json"
-  PATH_TO_IMG_TEST : "/home/vankhoa@median.cad/datasets/MedDec/Task016_Luna/coco/coco_format/val/images"
+  PATH_TO_LB_TRAIN: "/opt/data/Task016_Luna/coco_format/train_annotations.json"
+  PATH_TO_IMG_TRAIN: "/opt/data/Task016_Luna/coco_format/train/images"
+  PATH_TO_LB_TEST: "/opt/data/Task016_Luna/coco_format/val_annotations.json"
+  PATH_TO_IMG_TEST : "/opt/data/Task016_Luna/coco_format/val/images"
 SOLVER:
   STEPS: (350000, 420000)
   MAX_ITER: 450000
