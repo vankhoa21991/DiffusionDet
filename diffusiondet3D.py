@@ -1,3 +1,6 @@
+import SimpleITK as sitk
+import argparse
+
 # ========================================
 # Modified by Shoufa Chen
 # ========================================
@@ -19,10 +22,10 @@ from detectron2.modeling import META_ARCH_REGISTRY, build_backbone, detector_pos
 
 from detectron2.structures import Boxes, ImageList, Instances
 
-from .loss import SetCriterionDynamicK, HungarianMatcherDynamicK
-from .head import DynamicHead
-from .util.box_ops import box_cxcywh_to_xyxy, box_xyxy_to_cxcywh
-from .util.misc import nested_tensor_from_tensor_list
+from diffusiondet import SetCriterionDynamicK, HungarianMatcherDynamicK
+from diffusiondet import DynamicHead
+from diffusiondet import box_cxcywh_to_xyxy, box_xyxy_to_cxcywh
+from diffusiondet import nested_tensor_from_tensor_list
 
 __all__ = ["DiffusionDet"]
 
@@ -60,7 +63,7 @@ def cosine_beta_schedule(timesteps, s=0.008):
 
 
 @META_ARCH_REGISTRY.register()
-class DiffusionDet(nn.Module):
+class DiffusionDet3D(nn.Module):
     """
     Implement DiffusionDet
     """
@@ -395,13 +398,13 @@ class DiffusionDet(nn.Module):
         else:
             x_start = gt_boxes
 
-        x_start = (x_start * 2. - 1.) * self.scale # scale to [-1, 1]
+        x_start = (x_start * 2. - 1.) * self.scale # what is this??
         print(x_start.shape)
         # noise sample
-        x = self.q_sample(x_start=x_start, t=t, noise=noise) # x_start is pad boxes (B,N,4), x is new boxes
+        x = self.q_sample(x_start=x_start, t=t, noise=noise)
         print(x.shape)
         x = torch.clamp(x, min=-1 * self.scale, max=self.scale)
-        x = ((x / self.scale) + 1) / 2.  # scale to [0, 1]
+        x = ((x / self.scale) + 1) / 2.
 
         diff_boxes = box_cxcywh_to_xyxy(x)
         print(diff_boxes.shape, noise.shape, t)
@@ -417,13 +420,13 @@ class DiffusionDet(nn.Module):
             h, w = targets_per_image.image_size
             image_size_xyxy = torch.as_tensor([w, h, w, h], dtype=torch.float, device=self.device)
             gt_classes = targets_per_image.gt_classes
-            # print(targets_per_image.gt_boxes.tensor )
+            print(targets_per_image.gt_boxes.tensor )
             gt_boxes = targets_per_image.gt_boxes.tensor / image_size_xyxy
-            # print(gt_boxes)
+            print(gt_boxes)
             gt_boxes = box_xyxy_to_cxcywh(gt_boxes)
-            # print(gt_boxes)
+            print(gt_boxes)
             d_boxes, d_noise, d_t = self.prepare_diffusion_concat(gt_boxes)
-            # print(d_t)
+            print(d_t)
             diffused_boxes.append(d_boxes)
             noises.append(d_noise)
             ts.append(d_t)
@@ -519,3 +522,23 @@ class DiffusionDet(nn.Module):
         images_whwh = torch.stack(images_whwh)
 
         return images, images_whwh
+
+
+def main(args):
+
+    # Load the image
+    img = sitk.ReadImage(args.input)
+    img = sitk.GetArrayFromImage(img)
+    img = torch.from_numpy(img)
+    img = img.unsqueeze(0)
+
+    model = build_model(cfg)
+
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input", type=str, help="Path to the input image")
+    parser.add_argument("--output", type=str, help="Path to the output image")
+    args = parser.parse_args()
+    main(args)

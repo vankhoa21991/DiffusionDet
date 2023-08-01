@@ -115,12 +115,25 @@ class Trainer(DefaultTrainer):
 
     @classmethod
     def build_train_loader(cls, cfg):
+<<<<<<< Updated upstream
         # register_coco_instances(cfg.DATASETS.TRAIN[0], {},
         #                         cfg.DATASETS.PATH_TO_LB_TRAIN,
         #                         cfg.DATASETS.PATH_TO_IMG_TRAIN)
         # register_coco_instances(cfg.DATASETS.TEST[0], {},
         #                         cfg.DATASETS.PATH_TO_LB_TEST,
         #                         cfg.DATASETS.PATH_TO_IMG_TEST)
+=======
+        try:
+            register_coco_instances(cfg.DATASETS.TRAIN[0], {},
+                                    cfg.DATASETS.PATH_TO_LB_TRAIN,
+                                    cfg.DATASETS.PATH_TO_IMG_TRAIN)
+            register_coco_instances(cfg.DATASETS.TEST[0], {},
+                                    cfg.DATASETS.PATH_TO_LB_TEST,
+                                    cfg.DATASETS.PATH_TO_IMG_TEST)
+        except:
+            pass
+
+>>>>>>> Stashed changes
         mapper = DiffusionDetDatasetMapper(cfg, is_train=True)
         return build_detection_train_loader(cfg, mapper=mapper)
 

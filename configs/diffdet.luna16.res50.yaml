@@ -19,5 +19,5 @@ SOLVER:
   MAX_ITER: 450000
 INPUT:
   CROP:
-    ENABLED: True
+    ENABLED: False
   FORMAT: "L"
