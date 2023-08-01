@@ -146,7 +146,7 @@ class DynamicHead(nn.Module):
     def forward(self, features, init_bboxes, t, init_features):
         # assert t shape (batch_size)
         time = self.time_mlp(t)
-
+        print(t, time.shape)
         inter_class_logits = []
         inter_pred_bboxes = []
 

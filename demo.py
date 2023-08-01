@@ -18,7 +18,7 @@ from diffusiondet.predictor import VisualizationDemo
 from diffusiondet import DiffusionDetDatasetMapper, add_diffusiondet_config, DiffusionDetWithTTA
 from diffusiondet.util.model_ema import add_model_ema_configs, may_build_model_ema, may_get_ema_checkpointer, EMAHook, \
     apply_model_ema_and_restore, EMADetectionCheckpointer
-
+from detectron2.data.datasets import register_coco_instances
 # constants
 WINDOW_NAME = "COCO detections"
 
@@ -103,6 +103,12 @@ if __name__ == "__main__":
     logger.info("Arguments: " + str(args))
 
     cfg = setup_cfg(args)
+    register_coco_instances(cfg.DATASETS.TRAIN[0], {},
+                            cfg.DATASETS.PATH_TO_LB_TRAIN,
+                            cfg.DATASETS.PATH_TO_IMG_TRAIN)
+    register_coco_instances(cfg.DATASETS.TEST[0], {},
+                            cfg.DATASETS.PATH_TO_LB_TEST,
+                            cfg.DATASETS.PATH_TO_IMG_TEST)
 
     demo = VisualizationDemo(cfg)
 
@@ -112,7 +118,7 @@ if __name__ == "__main__":
             assert args.input, "The input path(s) was not found"
         for path in tqdm.tqdm(args.input, disable=not args.output):
             # use PIL, to be consistent with evaluation
-            img = read_image(path, format="BGR")
+            img = read_image(path, format="L")
             start_time = time.time()
             predictions, visualized_output = demo.run_on_image(img)
             logger.info(
@@ -135,7 +141,9 @@ if __name__ == "__main__":
                 visualized_output.save(out_filename)
             else:
                 cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
-                cv2.imshow(WINDOW_NAME, visualized_output.get_image()[:, :, ::-1])
+                img = visualized_output.get_image()[:, :, ::-1]
+                img2 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                cv2.imshow(WINDOW_NAME, img2)
                 if cv2.waitKey(0) == 27:
                     break  # esc to quit
     elif args.webcam:
