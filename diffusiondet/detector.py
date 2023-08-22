@@ -295,7 +295,7 @@ class DiffusionDet(nn.Module):
 
                 Other information that's included in the original dicts, such as:
 
-                * "height", "width" (int): the output resolution of the model, used in inference.
+                * "height", "width" (int): the output_lidc10 resolution of the model, used in inference.
                   See :meth:`postprocess` for details.
         """
         print(batched_inputs)

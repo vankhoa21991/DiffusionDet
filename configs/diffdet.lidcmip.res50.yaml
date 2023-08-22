@@ -14,6 +14,7 @@ DATASETS:
   PATH_TO_IMG_TRAIN: "/opt/data/Task300_LIDCfull_resampled_coco/train/images"
   PATH_TO_LB_TEST:   "/opt/data/Task300_LIDCfull_resampled_coco/val_annotations.json"
   PATH_TO_IMG_TEST : "/opt/data/Task300_LIDCfull_resampled_coco/val/images"
+OUTPUT_DIR : "/opt/data/Task301_LIDCfull_resampled_coco_30mm/output/"
 SOLVER:
   STEPS: (350000, 420000)
   MAX_ITER: 450000

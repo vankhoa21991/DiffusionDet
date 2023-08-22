@@ -105,7 +105,7 @@ class WindowAttention(nn.Module):
         qkv_bias (bool, optional):  If True, add a learnable bias to query, key, value. Default: True
         qk_scale (float | None, optional): Override default qk scale of head_dim ** -0.5 if set
         attn_drop (float, optional): Dropout ratio of attention weight. Default: 0.0
-        proj_drop (float, optional): Dropout ratio of output. Default: 0.0
+        proj_drop (float, optional): Dropout ratio of output_lidc10. Default: 0.0
     """
 
     def __init__(self, dim, window_size, num_heads, qkv_bias=True, qk_scale=None, attn_drop=0., proj_drop=0.):
@@ -424,7 +424,7 @@ class PatchEmbed(nn.Module):
     Args:
         patch_size (int): Patch token size. Default: 4.
         in_chans (int): Number of input image channels. Default: 3.
-        embed_dim (int): Number of linear projection output channels. Default: 96.
+        embed_dim (int): Number of linear projection output_lidc10 channels. Default: 96.
         norm_layer (nn.Module, optional): Normalization layer. Default: None
     """
 
@@ -470,7 +470,7 @@ class SwinTransformer(Backbone):
             used in absolute postion embedding. Default 224.
         patch_size (int | tuple(int)): Patch size. Default: 4.
         in_chans (int): Number of input image channels. Default: 3.
-        embed_dim (int): Number of linear projection output channels. Default: 96.
+        embed_dim (int): Number of linear projection output_lidc10 channels. Default: 96.
         depths (tuple[int]): Depths of each Swin Transformer stage.
         num_heads (tuple[int]): Number of attention head of each stage.
         window_size (int): Window size. Default: 7.
@@ -560,7 +560,7 @@ class SwinTransformer(Backbone):
         num_features = [int(embed_dim * 2 ** i) for i in range(self.num_layers)]
         self.num_features = num_features
 
-        # add a norm layer for each output
+        # add a norm layer for each output_lidc10
         for i_layer in out_indices:
             layer = norm_layer(num_features[i_layer])
             layer_name = f'norm{i_layer}'

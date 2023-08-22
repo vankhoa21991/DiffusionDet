@@ -58,9 +58,9 @@ def get_parser():
         "or a single glob pattern such as 'directory/*.jpg'",
     )
     parser.add_argument(
-        "--output",
-        help="A file or directory to save output visualizations. "
-        "If not given, will show output in an OpenCV window.",
+        "--output_lidc10",
+        help="A file or directory to save output_lidc10 visualizations. "
+        "If not given, will show output_lidc10 in an OpenCV window.",
     )
 
     parser.add_argument(
@@ -136,7 +136,7 @@ if __name__ == "__main__":
                     assert os.path.isdir(args.output), args.output
                     out_filename = os.path.join(args.output, os.path.basename(path))
                 else:
-                    assert len(args.input) == 1, "Please specify a directory with args.output"
+                    assert len(args.input) == 1, "Please specify a directory with args.output_lidc10"
                     out_filename = args.output
                 visualized_output.save(out_filename)
             else:
@@ -148,7 +148,7 @@ if __name__ == "__main__":
                     break  # esc to quit
     elif args.webcam:
         assert args.input is None, "Cannot have both --input and --webcam!"
-        assert args.output is None, "output not yet supported with --webcam!"
+        assert args.output is None, "output_lidc10 not yet supported with --webcam!"
         cam = cv2.VideoCapture(0)
         for vis in tqdm.tqdm(demo.run_on_video(cam)):
             cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)

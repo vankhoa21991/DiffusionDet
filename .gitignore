@@ -1,5 +1,6 @@
-# output dir
-output
+# output_lidc10 dir
+output_lidc10
+output_lidc30
 output*
 instant_test_output
 inference_test_output

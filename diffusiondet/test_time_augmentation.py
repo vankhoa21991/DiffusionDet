@@ -111,7 +111,7 @@ class DiffusionDetWithTTA(GeneralizedRCNNWithTTA):
             input (dict): one dataset dict with "image" field being a CHW tensor
 
         Returns:
-            dict: one output dict
+            dict: one output_lidc10 dict
         """
         orig_shape = (input["height"], input["width"])
         augmented_inputs, tfms = self._get_augmented_inputs(input)

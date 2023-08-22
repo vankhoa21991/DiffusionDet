@@ -43,8 +43,8 @@ class VisualizationDemo(object):
                 This is the format used by OpenCV.
 
         Returns:
-            predictions (dict): the output of the model.
-            vis_output (VisImage): the visualized image output.
+            predictions (dict): the output_lidc10 of the model.
+            vis_output (VisImage): the visualized image output_lidc10.
         """
         vis_output = None
         predictions = self.predictor(image)

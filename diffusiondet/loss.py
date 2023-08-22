@@ -228,7 +228,7 @@ class SetCriterionDynamicK(nn.Module):
     def forward(self, outputs, targets):
         """ This performs the loss computation.
         Parameters:
-             outputs: dict of tensors, see the output specification of the model for the format
+             outputs: dict of tensors, see the output_lidc10 specification of the model for the format
              targets: list of dicts, such that len(targets) == batch_size.
                       The expected keys in each dict depends on the losses applied, see each loss' doc
         """
@@ -249,7 +249,7 @@ class SetCriterionDynamicK(nn.Module):
         for loss in self.losses:
             losses.update(self.get_loss(loss, outputs, targets, indices, num_boxes))
 
-        # In case of auxiliary losses, we repeat this process with the output of each intermediate layer.
+        # In case of auxiliary losses, we repeat this process with the output_lidc10 of each intermediate layer.
         if 'aux_outputs' in outputs:
             for i, aux_outputs in enumerate(outputs['aux_outputs']):
                 indices, _ = self.matcher(aux_outputs, targets)

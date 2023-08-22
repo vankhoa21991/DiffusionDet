@@ -10,11 +10,9 @@ import warnings
 import cv2
 import tqdm
 import torch
-<<<<<<< Updated upstream
-=======
 import pickle
->>>>>>> Stashed changes
 import SimpleITK as sitk
+from ensemble_boxes import *
 
 from detectron2.config import get_cfg
 from detectron2.data.detection_utils import read_image
@@ -24,6 +22,7 @@ from detectron2.engine.defaults import DefaultPredictor
 from detectron2.modeling import build_model
 from detectron2.checkpoint import DetectionCheckpointer
 import detectron2.data.transforms as T
+from nndet.inference.detection import batched_nms_model, batched_wbc_ensemble
 
 from diffusiondet.predictor import VisualizationDemo
 from diffusiondet import DiffusionDetDatasetMapper, add_diffusiondet_config, DiffusionDetWithTTA
@@ -33,10 +32,7 @@ from diffusiondet.util.mip import createMIP_transverse_nifti
 
 def setup_cfg(args):
     # load config from file and command-line arguments
-<<<<<<< Updated upstream
-=======
     os.makedirs(args.output, exist_ok=True)
->>>>>>> Stashed changes
     cfg = get_cfg()
     add_diffusiondet_config(cfg)
     add_model_ema_configs(cfg)
@@ -65,8 +61,8 @@ def get_parser():
     )
     parser.add_argument(
         "--output",
-        help="A file or directory to save output visualizations. "
-        "If not given, will show output in an OpenCV window.",
+        help="A file or directory to save output_lidc10 visualizations. "
+        "If not given, will show output_lidc10 in an OpenCV window.",
     )
 
     parser.add_argument(
@@ -83,8 +79,6 @@ def get_parser():
     )
     return parser
 
-<<<<<<< Updated upstream
-=======
 def normalize(img_np):
     # clip percentile
     mean_intensity = -160
@@ -96,7 +90,6 @@ def normalize(img_np):
     return img_np
 
 
->>>>>>> Stashed changes
 class DiffusionDetPredictor(DefaultPredictor):
     def __init__(self, cfg):
         self.cfg = cfg.clone()  # cfg can be modified by model
@@ -119,51 +112,6 @@ class DiffusionDetPredictor(DefaultPredictor):
 
         # print(self.cfg)
 
-<<<<<<< Updated upstream
-    def normalize(self, img_np):
-        # clip percentile
-        mean_intensity = -160
-        std_intensity = 333
-        lower_bound = -900
-        upper_bound = 1600
-        img_np = np.clip(img_np, lower_bound, upper_bound)
-        img_np = (img_np - mean_intensity) / std_intensity
-        return img_np
-
-    def predict_one_slice(self, slice_img_np, slice_idx):
-        predictions = self(slice_img_np)
-        print(predictions)
-        exit()
-        return boxes, scores, labels
-    
-    def __call__(self, original_image):
-        """
-        """
-        img_np = sitk.GetArrayFromImage(original_image)
-
-        # normalize img_np
-        img_np = self.normalize(img_np)
-
-        print(img_np.shape)
-        # get mip of img_np and mask_np
-        slice_num = int(10/0.625) # 10 mm / 0.625 mm per slice
-        mip_img_np = createMIP_transverse_nifti(img_np, slices_num=slice_num)
-        print(mip_img_np.shape)
-        
-        all_boxes = []
-        all_scores = []
-        all_labels = []
-        for slice_idx in range(mip_img_np.shape[0]):
-            img_slice_np = mip_img_np[slice_idx]
-            boxes, scores, labels = self.predict_one_slice(img_slice_np, slice_idx)
-            all_boxes.append(boxes)
-            all_scores.append(scores)
-            all_labels.append(labels)
-
-        return all_boxes, all_scores, all_labels
-
-def main(cfg, args):
-=======
     def __call__(self, original_image):
         with torch.no_grad():  # https://github.com/sphinx-doc/sphinx/issues/4258
             # Apply pre-processing to image.
@@ -180,23 +128,12 @@ def main(cfg, args):
             return predictions
 
 
-def main(cfg, args, threshold=0.5):
->>>>>>> Stashed changes
+def main(cfg, args, threshold=0.2):
     # load all volumes in the input directory
     paths = glob.glob(os.path.join(args.input, "*_vol.nii.gz"))
     print("Found {} volumes in the input directory".format(len(paths)))
     print(paths[0])
 
-<<<<<<< Updated upstream
-    predictor = DiffusionDetPredictor(cfg)
-
-    for path in tqdm.tqdm(paths):
-        img_sitk = sitk.ReadImage(path)
-        boxes, scores, labels = predictor(img_sitk)
-
-if __name__ == "__main__":
-
-=======
     # predictor = DiffusionDetPredictor(cfg)
     predictor = DefaultPredictor(cfg)
 
@@ -214,7 +151,7 @@ if __name__ == "__main__":
 
         print(img_np.shape)
         # get mip of img_np and mask_np
-        slice_num = int(10 / 0.625)  # 10 mm / 0.625 mm per slice
+        slice_num = int(30 / 0.625)  # 10 mm / 0.625 mm per slice
         print(slice_num) # 16
         mip_img_np = createMIP_transverse_nifti(img_np, slices_num=slice_num)
         print(mip_img_np.shape)
@@ -240,25 +177,71 @@ if __name__ == "__main__":
                 else:
                     boxes3d = np.zeros((len(boxes), 6))
                     for i in range(len(boxes)):
-                        boxes3d[i] = np.append(boxes[i], [slice_idx, slice_idx+slice_num])
-
-                all_boxes.append(boxes3d)
-                all_scores.append(scores)
-                all_labels.append(labels)
+                        boxes3d[i] = np.append([slice_idx, slice_idx+slice_num], boxes[i]) # (z0, z1, x0, y0, x1, y1)
+                        # transpose to (z0, y0, z1, y1, x0, x1)
+                        # boxes3d[i] = boxes3d[i][[0, 3, 1, 5, 2, 4]]
+                        boxes3d[i] = boxes3d[i][[2, 3, 0, 4, 5, 1]]
+                        all_boxes.append(boxes3d[i])
+                        all_scores.append(scores[i])
+                        all_labels.append(labels[i])
             except Exception as e:
                 print(e)
                 print("Error in slice {} of serie uid {}".format(slice_idx, uid) )
                 continue
 
         # process all_boxes
-        all_boxes = np.concatenate(all_boxes, axis=0)
-        all_scores = np.concatenate(all_scores, axis=0)
-        all_labels = np.concatenate(all_labels, axis=0)
+        all_boxes = np.array(all_boxes)
+        all_scores = np.array(all_scores)
+        all_labels = np.array(all_labels)
+
+        # top k=100
+        _, idx = torch.from_numpy(all_scores).sort(descending=True)
+        idx = idx[:100]
+        all_boxes = all_boxes[idx]
+        all_scores = all_scores[idx]
+        all_labels = all_labels[idx]
+
+        # apply nms
+        # all_boxes, all_scores, all_labels, _ = batched_nms_model(torch.from_numpy(all_boxes), torch.from_numpy(all_scores), torch.from_numpy(all_labels), torch.from_numpy(all_labels), iou_thresh=0.01)
+
+        # apply wbc
+        # num_models = 1
+        # n_exp_preds = torch.tensor([num_models] * len(all_boxes)).to(torch.from_numpy(all_boxes))
+        # weights = torch.tensor([1.0/len(all_boxes)] * len(all_boxes)).to(torch.from_numpy(all_boxes))
+        # all_boxes_new, all_scores_new, all_labels_new = batched_wbc_ensemble(torch.from_numpy(all_boxes), torch.from_numpy(all_scores), torch.from_numpy(all_labels), weights,
+        #                                                          iou_thresh=0.005,
+        #                                                          score_thresh=0.0,
+        #                                                          n_exp_preds=n_exp_preds)
+
+        # convert to numpy
+        # all_boxes_new = all_boxes_new.numpy()
+        # all_scores_new = all_scores_new.numpy()
+        # all_labels_new = all_labels_new.numpy()
+
+
+        # apply wbs
+        iou_thr = 0.005
+        skip_box_thr = 0.0001
+        sigma = 0.1
+        weights = [1]
+
+        # all_boxes_new = []
+        # scale to 0-1
+        all_boxes_new = [[b[0]/size[0], b[1]/size[1], b[2]/size[2],b[3]/size[0], b[4]/size[1], b[5]/size[2]]for b in list(all_boxes)]
+        all_boxes_new, all_scores_new, all_labels_new = weighted_boxes_fusion_3d([all_boxes_new], [list(all_scores)], [list(all_labels)], weights=weights,
+                                                      iou_thr=iou_thr, skip_box_thr=skip_box_thr)
+
+        # scale back to original size
+        all_boxes_new = [[b[2]*size[2], b[1]*size[1], b[5]*size[2], b[4]*size[1], b[0]*size[0], b[3]*size[0]]for b in list(all_boxes_new)]
+        all_boxes_new = np.array(all_boxes_new)
+        all_scores_new = np.array(all_scores_new)
+        all_labels_new = np.array(all_labels_new)
+
 
         result = {
-            "pred_boxes": all_boxes,
-            "pred_scores": all_scores,
-            "pred_labels": all_labels,
+            "pred_boxes": all_boxes_new,
+            "pred_scores": all_scores_new,
+            "pred_labels": all_labels_new,
             "itk_spacing": spacing,
             "itk_origin": origin,
             "itk_direction": direction,
@@ -275,7 +258,6 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
->>>>>>> Stashed changes
     args = get_parser().parse_args()
     setup_logger(name="fvcore")
     logger = setup_logger()

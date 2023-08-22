@@ -1,0 +1,24 @@
+_BASE_: "Base-DiffusionDet.yaml"
+MODEL:
+  WEIGHTS: "detectron2://ImageNetPretrained/torchvision/R-50.pkl"
+  RESNETS:
+    DEPTH: 50
+    STRIDE_IN_1X1: False
+  DiffusionDet:
+    NUM_PROPOSALS: 500
+    NUM_CLASSES: 1
+DATASETS:
+  TRAIN: ("lidcmip_train",)
+  TEST:  ("lidcmip_val",)
+  PATH_TO_LB_TRAIN:  "/opt/data/Task301_LIDCfull_resampled_coco_30mm/train_annotations.json"
+  PATH_TO_IMG_TRAIN: "/opt/data/Task301_LIDCfull_resampled_coco_30mm/train/images"
+  PATH_TO_LB_TEST:   "/opt/data/Task301_LIDCfull_resampled_coco_30mm/val_annotations.json"
+  PATH_TO_IMG_TEST : "/opt/data/Task301_LIDCfull_resampled_coco_30mm/val/images"
+  OUTPUT_DIR : "/opt/data/Task301_LIDCfull_resampled_coco_30mm/output/"
+SOLVER:
+  STEPS: (350000, 420000)
+  MAX_ITER: 450000
+INPUT:
+  CROP:
+    ENABLED: True
+  FORMAT: "L"

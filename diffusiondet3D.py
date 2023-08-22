@@ -298,7 +298,7 @@ class DiffusionDet3D(nn.Module):
 
                 Other information that's included in the original dicts, such as:
 
-                * "height", "width" (int): the output resolution of the model, used in inference.
+                * "height", "width" (int): the output_lidc10 resolution of the model, used in inference.
                   See :meth:`postprocess` for details.
         """
         print(batched_inputs)
@@ -539,6 +539,6 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", type=str, help="Path to the input image")
-    parser.add_argument("--output", type=str, help="Path to the output image")
+    parser.add_argument("--output_lidc10", type=str, help="Path to the output_lidc10 image")
     args = parser.parse_args()
     main(args)
